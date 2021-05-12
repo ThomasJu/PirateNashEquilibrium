@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optimizer
 import numpy as np
-from dataloader import play_games
+from dataloader import play_games, official_game
 
 def train_model(sharesnn, shares_optim, votesnn, votes_optim, num_epoch=5, collect_cycle=30, device='cpu', verbose=True):
     # Initialize:
@@ -11,6 +11,7 @@ def train_model(sharesnn, shares_optim, votesnn, votes_optim, num_epoch=5, colle
     if verbose:
         print('------------------------ Start Training ------------------------')
     t_start = time.time()
+    num_itr = 0
     for epoch in range(num_epoch):
         ############## Training ##############
         sharesnn.train()

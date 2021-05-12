@@ -1,16 +1,17 @@
+import torch
 # Game procedure
 # Round 1
 def play_games(sharesnn, votesnn, shares_optim, votes_optim):
     # round 1
     proposed_shares = sharesnn.forward(1)
-    votes = [votesnn.forward(i, proposed_shares) for i in range(3)]
+    votes = [votesnn.forward(i, proposed_shares, 1) for i in range(3)]
     if sum(votes)/len(votes) > 0.5:      # proposed_shares win the election
         conclude_games(proposed_shares, shares_optim, votes_optim, 0)
         return proposed_shares
     
     # round 2 (player 1 solution isn't approved by half the players)
     proposed_shares = sharesnn.forward(2)
-    votes = [votesnn.forward(i, proposed_shares) for i in range(1, 3)]
+    votes = [votesnn.forward(i, proposed_shares, 2) for i in range(1, 3)]
     if sum(votes)/len(votes) > 0.5:      # proposed_shares win the election
         conclude_games(proposed_shares, shares_optim, votes_optim, 1)
         return proposed_shares
@@ -21,11 +22,12 @@ def play_games(sharesnn, votesnn, shares_optim, votes_optim):
     return proposed_shares
     
 def conclude_games(proposed_shares, shares_optim, votes_optim, i):
-    torch.index_select(proposed_shares, 0, torch.tensor([i])).backwards()
+    torch.autograd.set_detect_anomaly(True)
+    torch.index_select(proposed_shares, 0, torch.tensor([i])).backward(retain_graph=True)
     shares_optim.step()
     
     for i in range(3):
-        torch.index_select(proposed_shares, 0, torch.tensor([i])).backwards()
+        torch.index_select(proposed_shares, 0, torch.tensor([i])).backward()
         votes_optim.step()
 
 
