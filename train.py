@@ -33,7 +33,9 @@ def train_model(sharesnn, shares_optim, votesnn, votes_optim, num_epoch=5, colle
 
         ############## Validation ##############
         # now see how much the players has learn from failures
-        official_game(sharesnn, votesnn)
+        if epoch % 10 == 0:
+            print('aaaa')
+            official_game(sharesnn, votesnn)
     
     t_end = time.time()
     if verbose:

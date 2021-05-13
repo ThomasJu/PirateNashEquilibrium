@@ -22,6 +22,7 @@ class ShareNN(nn.Module):
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
+        x = F.softmax(x, dim=0)
         return x
     
 
@@ -39,11 +40,11 @@ class VotesNN(nn.Module):
     
     def forward(self, player_id, proposed_shares, games_round):
         player_id = torch.tensor(player_id, dtype=torch.float, requires_grad = True).unsqueeze(dim=0)
-        proposed_shares = torch.tensor(proposed_shares, dtype = torch.float, requires_grad = True)
         games_round = torch.tensor(games_round, dtype = torch.float, requires_grad = True).unsqueeze(dim=0)
         x = torch.cat((player_id, proposed_shares, games_round))
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
+        x = torch.clamp(x, min=0, max=1)
         return x

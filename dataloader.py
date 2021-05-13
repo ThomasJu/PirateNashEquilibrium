@@ -23,12 +23,15 @@ def play_games(sharesnn, votesnn, shares_optim, votes_optim):
     
 def conclude_games(proposed_shares, shares_optim, votes_optim, i):
     torch.autograd.set_detect_anomaly(True)
-    torch.index_select(proposed_shares, 0, torch.tensor([i])).backward(retain_graph=True)
+    torch.mul(torch.index_select(proposed_shares, 0, torch.tensor([i])), -1).backward(retain_graph=True)
     shares_optim.step()
+    votes_optim.step()
     
-    for i in range(3):
-        torch.index_select(proposed_shares, 0, torch.tensor([i])).backward()
-        votes_optim.step()
+    # for j in range(3):
+    #     torch.mul(torch.index_select(proposed_shares, 0, torch.tensor([j])), -1).backward(retain_graph=True)
+    #     votes_optim.step()
+    #     if i == j:
+    #         shares_optim.step()
 
 
 
@@ -38,7 +41,7 @@ def official_game(sharesnn, votesnn):
     print(f'Round 1')
     proposed_shares = sharesnn.forward(1)
     print(f'player1 propose {proposed_shares}')    
-    votes = [votesnn.forward(i, proposed_shares) for i in range(3)]
+    votes = [votesnn.forward(i, proposed_shares, 1) for i in range(3)]
     print(f'players votes: {votes}')
     if sum(votes)/len(votes) > 0.5:      # proposed_shares win the election
         print(f'players accept player1 policy with proposed_shares {proposed_shares}')
@@ -49,7 +52,7 @@ def official_game(sharesnn, votesnn):
     print(f'Round 2')
     proposed_shares = sharesnn.forward(2)
     print(f'player2 propose {proposed_shares}') 
-    votes = [votesnn.forward(i, proposed_shares) for i in range(1, 3)]
+    votes = [votesnn.forward(i, proposed_shares, 2) for i in range(1, 3)]
     print(f'players votes: {votes}')
     if sum(votes)/len(votes) > 0.5:      # proposed_shares win the election
         print(f'players accept player2 policy with proposed_shares {proposed_shares}')
