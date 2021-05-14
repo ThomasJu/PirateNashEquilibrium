@@ -67,7 +67,7 @@ def pre_train_votes(votesnn, votes_optim, num_epoch=5, collect_cycle=30, device=
             pretrain_dataloader = DataLoader(dataset, batch_size=5, shuffle=True)
             for databatch in pretrain_dataloader:
                 vote = votenn.forward(databatch['data'][0], databatch['data'][1])
-                loss = loss_func(vote, databatch['label']).float()
+                loss = loss_func(vote.float(), databatch['label'])
                 print(loss)
                 loss.backward()
                 voteoptim.step()     
